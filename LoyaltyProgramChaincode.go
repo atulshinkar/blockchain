@@ -46,7 +46,6 @@ func (t *LoyaltyProgramChaincode) Init(stub shim.ChaincodeStubInterface, functio
 // Add Merchant data in BLockChain
 func (t *LoyaltyProgramChaincode) Invoke(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 	
-	fmt.Printf("============================== incomingObjType: "+incomingObjType)
 	if function == "AddMerchant" {		
 		return t.AddNewMerchantDetails(stub, args)
 	}
