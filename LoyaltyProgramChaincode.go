@@ -256,6 +256,7 @@ func (t *LoyaltyProgramChaincode) Query(stub shim.ChaincodeStubInterface,functio
 		resAsBytes, err := t.GetPoints(stub, args)
 	} 
 	
+	fmt.Printf("Output from chaincode: %s\n", err)
 	fmt.Printf("Query Response:%s\n", resAsBytes)
 	
 	if err != nil {
