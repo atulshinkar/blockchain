@@ -1,5 +1,5 @@
 /*
-Copyright Capgemini India. 2016 All Rights Reserved.
+Copyright Capgemini India. 2017 All Rights Reserved.
 */
 
 package main
@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"encoding/json"
-	"strconv"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
@@ -17,23 +16,11 @@ type LoyaltyProgramChaincode struct {
 }
 
 var merchantIndexTxStr = "_merchantIndexTxStr"
-var userIndexTxStr = "_userIndexTxStr"
-var loginIndexTxStr = "_loginIndexTxStr"
-var transferIndexTxStr = "_transferIndexTxStr"
 
 type MerchantData struct {
 	MERCHANT_NAME string `json:"MERCHANT_NAME"`
 	MERCHANT_CITY string `json:"MERCHANT_CITY"`
 	MERCHANT_PHONE string `json:"MERCHANT_PHONE"`	
-}
-
-type UserData struct {
-	NAME string `json:"NAME"`
-	PHONENO string `json:"PHONENO"`
-	USERNAME string `json:"USERNAME"`
-	PASSWORD string `json:"PASSWORD"`
-	MERCHANTNAME string `json:"MERCHANTNAME"`
-	POINTS float64 `json:"POINTS"`
 }
 
 
@@ -53,14 +40,6 @@ func (t *LoyaltyProgramChaincode) Init(stub shim.ChaincodeStubInterface, functio
 		return nil, err
 	}
 	
-	//For User Initialization
-	var emptyUserTxs []UserData
-	jsonAsBytes2, _ := json.Marshal(emptyUserTxs)
-	err = stub.PutState(userIndexTxStr, jsonAsBytes2)
-	if err != nil {
-		return nil, err
-	}
-	
 	return nil, nil
 }
 
@@ -69,14 +48,7 @@ func (t *LoyaltyProgramChaincode) Invoke(stub shim.ChaincodeStubInterface, funct
 	
 	if function == "AddMerchant" {		
 		return t.AddNewMerchantDetails(stub, args)
-	} else if function == "AddUser" {		
-		return t.RegisterUser(stub, args)
-	} else if function == "Login" {		
-		return t.Login(stub, args)
-	} else if function == "Transfer" {		
-		return t.Transfer(stub, args)
 	}
-
 	return nil, nil
 }
 
@@ -114,155 +86,21 @@ func (t *LoyaltyProgramChaincode) AddNewMerchantDetails(stub shim.ChaincodeStubI
 	return nil, nil
 }
 
-func (t *LoyaltyProgramChaincode) RegisterUser(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
-	
-	var User UserData
-	var UserDataList []UserData
-	var err error
-
-	if len(args) != 5 {
-		return nil, errors.New("Incorrect number of arguments. Need 5 arguments")
-	}
-	
-	// Initialize the chaincode  for User data
-	User.NAME = args[0]
-	User.PHONENO = args[1]
-	User.USERNAME = args[2]
-	User.PASSWORD = args[3]
-	User.MERCHANTNAME = args[4]
-	 if User.MERCHANTNAME == "KMT" {
-		User.POINTS = 100
-	 } else if User.MERCHANTNAME == "SMC" {
-		User.POINTS = 150
-	 } 
-	
-	fmt.Printf("Input from user:%s\n", User)
-	
-	userTxsAsBytes, err := stub.GetState(userIndexTxStr)
-	if err != nil {
-		return nil, errors.New("Failed to get user data")
-	}
-	json.Unmarshal(userTxsAsBytes, &UserDataList)
-	
-	UserDataList = append(UserDataList, User)
-	jsonAsBytes2, _ := json.Marshal(UserDataList)
-	
-	err = stub.PutState(userIndexTxStr, jsonAsBytes2)
-	if err != nil {
-		return nil, err
-	}
-	return nil, nil
-}
-
-func (t *LoyaltyProgramChaincode) Login(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
-	
-	var username string
-	var password string
-	var users UserData
-	var err error
-
-	if len(args) != 3 {
-		return nil, errors.New("Incorrect number of arguments. Need 2 arguments")
-	}
-	
-	username = args[0]
-	password = args[1]
-	
-	users, err = t.GetUserDetails(stub, username) 
-
-	if users.USERNAME == username {
-		if users.PASSWORD == password {
-				return nil, nil
-			}
-	}	
-	
-	fmt.Printf("Output from chaincode: %s\n", err)
-	return nil , errors.New("Incorrect Username or Password")
-	
-}
-
-func (t *LoyaltyProgramChaincode) Transfer(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
-	
-	var touser string
-	var pointstotransfer float64
-	var err error
-	var currentuser string
-	var user UserData
-	var user2 UserData
-	var pt1 float64
-	var pt2 float64
-
-	if len(args) != 4 {
-		return nil, errors.New("Incorrect number of arguments. Need 4 arguments")
-	}
-	
-	currentuser  = args[0]
-	touser  = args[1]
-	pointstotransfer,err  = strconv.ParseFloat(args[3], 64)
-	
-	user, err = t.GetUserDetails(stub, currentuser) 
-	
-	if user.POINTS<=pointstotransfer {
-		user.POINTS = user.POINTS - pointstotransfer;
-		if user.MERCHANTNAME == "KMT" {
-		pt1 = user.POINTS * 0.1 
-		} else if user.MERCHANTNAME == "SMC" {
-			pt1 = user.POINTS * 0.15 
-		}
-	}
-
-	
-	user2, err = t.GetUserDetails(stub, touser) 
-	
-	if user2.MERCHANTNAME == "KMT" {
-		pt2 = user2.POINTS * 0.1 
-		pt2 = pt2 + pt1
-		user2.POINTS = pt2 / 0.1
-	} else if user2.MERCHANTNAME == "SMC" {
-		pt2 = user2.POINTS * 0.15 
-		pt2 = pt2 + pt1
-		user2.POINTS = pt2 / 0.15
-	}
-
-	res,err := json.Marshal(user2)
-	err = stub.PutState(userIndexTxStr, res)
-	if err != nil {
-		return nil, err
-	}
-	return nil, nil
-	
-}
-
-
 // Query callback representing the query of a chaincode - for Merchant
 func (t *LoyaltyProgramChaincode) Query(stub shim.ChaincodeStubInterface,function string, args []string) ([]byte, error) {
 	
 	var MerchantName string // Entities
-	var UserName string // Entities
 	var err error
 	var resAsBytes []byte
-	var userDataObj UserData
 
 	if len(args) != 1 {
 		return nil, errors.New("Incorrect number of arguments. Expecting name of the person to query")
 	}
 
-	if function == "GetMerchantDetails" {		
-		MerchantName = args[0]	
-		resAsBytes, err = t.GetMerchantDetails(stub, MerchantName)
-	} else if function == "GetUserDetails" {		
-		UserName = args[0]	
-		
-		userDataObj, err = t.GetUserDetails(stub, UserName)
-		resAsBytes,err = json.Marshal(userDataObj)
-		
-		
-	} 
-	//else if function == "GetUserPoints" {				
-		//resAsBytes, err = t.GetPoints(stub, args)
-	//} 
+	MerchantName = args[0]
 	
-	fmt.Printf("Output from chaincode: %s\n", err)
+	resAsBytes, err = t.GetMerchantDetails(stub, MerchantName)
+	
 	fmt.Printf("Query Response:%s\n", resAsBytes)
 	
 	if err != nil {
@@ -270,9 +108,7 @@ func (t *LoyaltyProgramChaincode) Query(stub shim.ChaincodeStubInterface,functio
 	}
 	
 	return resAsBytes, nil
-	
 }
-
 
 func (t *LoyaltyProgramChaincode)  GetMerchantDetails(stub shim.ChaincodeStubInterface, MerchantName string) ([]byte, error) {
 	
@@ -322,105 +158,6 @@ func (t *LoyaltyProgramChaincode)  GetMerchantDetails(stub shim.ChaincodeStubInt
 	}
 }
 
-func (t *LoyaltyProgramChaincode)  GetUserDetailsInByteArr(stub shim.ChaincodeStubInterface, UserName string) ([]byte, error) {
-	
-	//var requiredObj UserData
-	var objFound bool
-	UserTxsAsBytes, err := stub.GetState(userIndexTxStr)
-	if err != nil {
-		return nil, errors.New("Failed to get User Details")
-	}
-	var UserTxObjects []UserData
-	var UserTxObjects1 []UserData
-	json.Unmarshal(UserTxsAsBytes, &UserTxObjects)
-	length := len(UserTxObjects)
-	fmt.Printf("Output from chaincode: %s\n", UserTxsAsBytes)
-	
-	if UserName == "" {
-		res, err := json.Marshal(UserTxObjects)
-		if err != nil {
-		return nil, errors.New("Failed to Marshal the required Obj")
-		}
-		return res, nil
-	}
-	
-	objFound = false
-	// iterate
-	for i := 0; i < length; i++ {
-		obj := UserTxObjects[i]
-		if UserName == obj.USERNAME {
-			UserTxObjects1 = append(UserTxObjects1,obj)
-			//requiredObj = obj
-			objFound = true
-		}
-	}
-	
-	if objFound {
-		res, err := json.Marshal(UserTxObjects1)
-		if err != nil {
-		return nil, errors.New("Failed to Marshal the required Obj")
-		}
-		return res, nil
-	} else {
-		res, err := json.Marshal("No Data found")
-		if err != nil {
-		return nil, errors.New("Failed to Marshal the required Obj")
-		}
-		return res, nil
-	}
-}
-
-
-func (t *LoyaltyProgramChaincode)  GetUserDetails(stub shim.ChaincodeStubInterface, username string) (UserData, error) {
-	
-	var objFound bool
-	var UserTxObjects []UserData
-	var UserTxObjects1 []UserData
-	var currentuser UserData
-	UserTxsAsBytes, err := stub.GetState(userIndexTxStr)
-	if err != nil {
-		return  currentuser,errors.New("Failed to get Merchant Transactions")
-	}
-	
-	json.Unmarshal(UserTxsAsBytes, &UserTxObjects)
-	length := len(UserTxObjects)
-	fmt.Printf("Output from chaincode: %s\n", UserTxsAsBytes)
-	
-	if username == "" {
-		res, err := json.Marshal(UserTxObjects)
-		if err != nil {
-		return currentuser, errors.New("Failed to Marshal the required Obj")
-		}
-		fmt.Printf("Output from chaincode: %s\n", res)
-		return currentuser, nil
-	}
-	
-	objFound = false
-	// iterate
-	for i := 0; i < length; i++ {
-		obj := UserTxObjects[i]
-		if username == obj.USERNAME {
-			UserTxObjects1 = append(UserTxObjects1,obj)
-			//requiredObj = obj
-			objFound = true
-			currentuser = obj
-		}
-	}
-	
-	if objFound {
-		if err != nil {
-		return currentuser, errors.New("Failed to Marshal the required Obj")
-		}
-		return currentuser, nil
-	} else {
-		res, err := json.Marshal("No Data found")
-		if err != nil {
-		return currentuser, errors.New("Failed to Marshal the required Obj")
-		}
-		fmt.Printf("Output from chaincode: %s\n", res)
-		return currentuser, nil
-	}
-}
 
 
 // #############################################################################
