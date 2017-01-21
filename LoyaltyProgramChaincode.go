@@ -282,7 +282,7 @@ func (t *LoyaltyProgramChaincode) GetPoints(stub shim.ChaincodeStubInterface, ar
 	user, err = t.GetUserDetails(stub, currentuser) 
 	 
 
-	res,err := json.Marshal(user.POINTS)
+	res,err := json.Marshal(user)
 	err = stub.PutState(userIndexTxStr, res)
 	if err != nil {
 	return nil, err
