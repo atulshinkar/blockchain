@@ -47,6 +47,7 @@ func (t *LoyaltyProgramChaincode) Init(stub shim.ChaincodeStubInterface, functio
 func (t *LoyaltyProgramChaincode) Invoke(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 
 	var incomingObjType = args[0]
+	fmt.Printf("============================== incomingObjType: "+incomingObjType)
 	if incomingObjType == "AddMerchant" {
 		if function == merchantIndexTxStr {		
 			return t.AddNewMerchantDetails(stub, args)
