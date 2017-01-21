@@ -241,6 +241,7 @@ func (t *LoyaltyProgramChaincode) Query(stub shim.ChaincodeStubInterface,functio
 	var UserName string // Entities
 	var err error
 	var resAsBytes []byte
+	var userDataObj
 
 	if len(args) != 1 {
 		return nil, errors.New("Incorrect number of arguments. Expecting name of the person to query")
@@ -251,7 +252,11 @@ func (t *LoyaltyProgramChaincode) Query(stub shim.ChaincodeStubInterface,functio
 		resAsBytes, err = t.GetMerchantDetails(stub, MerchantName)
 	} else if function == "GetUserDetails" {		
 		UserName = args[0]	
-		resAsBytes, err = t.GetUserDetailsInByteArr(stub, UserName)
+		
+		userDataObj, err = t.GetUserDetailsInByteArr(stub, UserName)
+		resAsBytes,err = json.Marshal(userDataObj)
+		
+		
 	} else if function == "GetUserPoints" {				
 		resAsBytes, err = t.GetPoints(stub, args)
 	} 
@@ -283,7 +288,7 @@ func (t *LoyaltyProgramChaincode) GetPoints(stub shim.ChaincodeStubInterface, ar
 	 
 
 	res,err := json.Marshal(user)
-	err = stub.PutState(userIndexTxStr, res)
+	err = stub.GetState(userIndexTxStr, res)
 	if err != nil {
 	return nil, err
 	}
