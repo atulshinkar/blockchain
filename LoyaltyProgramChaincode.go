@@ -257,9 +257,10 @@ func (t *LoyaltyProgramChaincode) Query(stub shim.ChaincodeStubInterface,functio
 		resAsBytes,err = json.Marshal(userDataObj)
 		
 		
-	} else if function == "GetUserPoints" {				
-		resAsBytes, err = t.GetPoints(stub, args)
 	} 
+	//else if function == "GetUserPoints" {				
+		//resAsBytes, err = t.GetPoints(stub, args)
+	//} 
 	
 	fmt.Printf("Output from chaincode: %s\n", err)
 	fmt.Printf("Query Response:%s\n", resAsBytes)
@@ -272,29 +273,6 @@ func (t *LoyaltyProgramChaincode) Query(stub shim.ChaincodeStubInterface,functio
 	
 }
 
-func (t *LoyaltyProgramChaincode) GetPoints(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
- 
-	var err error
-	var currentuser string
-	var user UserData
-
-	if len(args) != 1 {
-	return nil, errors.New("Incorrect number of arguments. Need 1 arguments")
-	}
-	 
-	currentuser  = args[0]
-	 
-	user, err = t.GetUserDetails(stub, currentuser) 
-	 
-
-	res,err := json.Marshal(user)
-	err = stub.GetState(userIndexTxStr, res)
-	if err != nil {
-	return nil, err
-	}
-	return res, nil
-	 
-}
 
 func (t *LoyaltyProgramChaincode)  GetMerchantDetails(stub shim.ChaincodeStubInterface, MerchantName string) ([]byte, error) {
 	
