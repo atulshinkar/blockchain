@@ -253,7 +253,7 @@ func (t *LoyaltyProgramChaincode) Query(stub shim.ChaincodeStubInterface,functio
 	} else if function == "GetUserDetails" {		
 		UserName = args[0]	
 		
-		userDataObj, err = t.GetUserDetailsInByteArr(stub, UserName)
+		userDataObj, err = t.GetUserDetails(stub, UserName)
 		resAsBytes,err = json.Marshal(userDataObj)
 		
 		
