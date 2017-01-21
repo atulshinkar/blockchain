@@ -241,7 +241,6 @@ func (t *LoyaltyProgramChaincode) Query(stub shim.ChaincodeStubInterface,functio
 	var UserName string // Entities
 	var err error
 	var resAsBytes []byte
-	var userDataObj UserData
 
 	if len(args) != 1 {
 		return nil, errors.New("Incorrect number of arguments. Expecting name of the person to query")
