@@ -114,7 +114,7 @@ func (t *LoyaltyProgramChaincode)  GetMerchantDetails(stub shim.ChaincodeStubInt
 	
 	//var requiredObj MerchantData
 	var objFound bool
-	MerchantTxsAsBytes, err := stub.GetState("read")
+	MerchantTxsAsBytes, err := stub.GetState(merchantIndexTxStr)
 	if err != nil {
 		return nil, errors.New("Failed to get Merchant Transactions")
 	}
