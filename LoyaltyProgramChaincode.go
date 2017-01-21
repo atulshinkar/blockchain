@@ -45,14 +45,11 @@ func (t *LoyaltyProgramChaincode) Init(stub shim.ChaincodeStubInterface, functio
 
 // Add Merchant data in BLockChain
 func (t *LoyaltyProgramChaincode) Invoke(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
-
-	var incomingObjType = args[0]
+	
 	fmt.Printf("============================== incomingObjType: "+incomingObjType)
-	if incomingObjType == "AddMerchant" {
-		if function == merchantIndexTxStr {		
-			return t.AddNewMerchantDetails(stub, args)
-		}
-	} 
+	if function == "AddMerchant" {		
+		return t.AddNewMerchantDetails(stub, args)
+	}
 	return nil, nil
 }
 
@@ -63,14 +60,14 @@ func (t *LoyaltyProgramChaincode) AddNewMerchantDetails(stub shim.ChaincodeStubI
 	var MerchantDataList []MerchantData
 	var err error
 
-	if len(args) != 4 {
+	if len(args) != 3 {
 		return nil, errors.New("Incorrect number of arguments. Need 14 arguments")
 	}
 
 	// Initialize the chaincode  for Merchant data
-	MerchantDataObj.MERCHANT_NAME = args[1]
-	MerchantDataObj.MERCHANT_CITY = args[2]
-	MerchantDataObj.MERCHANT_PHONE = args[3]
+	MerchantDataObj.MERCHANT_NAME = args[0]
+	MerchantDataObj.MERCHANT_CITY = args[1]
+	MerchantDataObj.MERCHANT_PHONE = args[2]
 	
 	fmt.Printf("Input from user:%s\n", MerchantDataObj)
 	
@@ -118,7 +115,7 @@ func (t *LoyaltyProgramChaincode)  GetMerchantDetails(stub shim.ChaincodeStubInt
 	
 	//var requiredObj MerchantData
 	var objFound bool
-	MerchantTxsAsBytes, err := stub.GetState(merchantIndexTxStr)
+	MerchantTxsAsBytes, err := stub.GetState("read")
 	if err != nil {
 		return nil, errors.New("Failed to get Merchant Transactions")
 	}
