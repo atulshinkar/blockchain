@@ -262,6 +262,8 @@ func (t *LoyaltyProgramChaincode) Query(stub shim.ChaincodeStubInterface,functio
 		return nil, err
 	}
 	
+	return resAsBytes, nil
+	
 }
 
 func (t *LoyaltyProgramChaincode) GetPoints(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
