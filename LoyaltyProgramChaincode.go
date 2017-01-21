@@ -238,7 +238,6 @@ func (t *LoyaltyProgramChaincode) Transfer(stub shim.ChaincodeStubInterface, arg
 func (t *LoyaltyProgramChaincode) Query(stub shim.ChaincodeStubInterface,function string, args []string) ([]byte, error) {
 	
 	var MerchantName string // Entities
-	var UserName string // Entities
 	var err error
 	var resAsBytes []byte
 
