@@ -246,15 +246,10 @@ func (t *LoyaltyProgramChaincode) Query(stub shim.ChaincodeStubInterface,functio
 	if len(args) != 1 {
 		return nil, errors.New("Incorrect number of arguments. Expecting name of the person to query")
 	}
-
-	if function == "GetMerchantDetails" {		
-		MerchantName = args[0]	
-		resAsBytes, err = t.GetMerchantDetails(stub, MerchantName)
-	} else if function == "GetUserDetails" {		
-		UserName = args[0]	
-		userDataObj, err = t.GetUserDetails(stub, UserName)
-		resAsBytes, err = json.Marshal(userDataObj)
-	}
+	
+	MerchantName = args[0]	
+	resAsBytes, err = t.GetMerchantDetails(stub, MerchantName)
+		
 	
 	fmt.Printf("Query Response:%s\n", resAsBytes)
 	
