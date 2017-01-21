@@ -62,14 +62,14 @@ func (t *LoyaltyProgramChaincode) AddNewMerchantDetails(stub shim.ChaincodeStubI
 	var MerchantDataList []MerchantData
 	var err error
 
-	if len(args) != 3 {
+	if len(args) != 4 {
 		return nil, errors.New("Incorrect number of arguments. Need 14 arguments")
 	}
 
 	// Initialize the chaincode  for Merchant data
-	MerchantDataObj.MERCHANT_NAME = args[0]
-	MerchantDataObj.MERCHANT_CITY = args[1]
-	MerchantDataObj.MERCHANT_PHONE = args[2]
+	MerchantDataObj.MERCHANT_NAME = args[1]
+	MerchantDataObj.MERCHANT_CITY = args[2]
+	MerchantDataObj.MERCHANT_PHONE = args[3]
 	
 	fmt.Printf("Input from user:%s\n", MerchantDataObj)
 	
