@@ -251,11 +251,10 @@ func (t *LoyaltyProgramChaincode) Query(stub shim.ChaincodeStubInterface,functio
 		resAsBytes, err = t.GetMerchantDetails(stub, MerchantName)
 	} else if function == "GetUserDetails" {		
 		UserName = args[0]	
-		resAsBytes, err := t.GetUserDetailsInByteArr(stub, UserName)
+		resAsBytes, err = t.GetUserDetailsInByteArr(stub, UserName)
+	} else if function == "GetUserPoints" {				
+		resAsBytes, err = t.GetPoints(stub, args)
 	} 
-	//else if function == "GetUserPoints" {				
-		//resAsBytes, err := t.GetPoints(stub, args)
-	//} 
 	
 	fmt.Printf("Output from chaincode: %s\n", err)
 	fmt.Printf("Query Response:%s\n", resAsBytes)
